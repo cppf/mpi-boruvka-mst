@@ -89,7 +89,7 @@ int trees_merge(int *trees, int tree_count,
     if (source == target) continue;
     int from = source>target? source : target;
     int to = from==target? source : target;
-    forest_rename(vertices, tree_count, from, to);
+    vertices_rename(vertices, tree_count, from, to);
     trees_rename(trees, tree_count, from, to);
     trees[component] = to;
     merged++;
@@ -107,10 +107,32 @@ int* boruvka_mst(int vertex_count, Edge *edges, int edge_count) {
     components_find(components, vertices, edges, 0, edge_count);
     merged = trees_merge(trees, edge_count, components, component_count, vertices, edges);
   }while(merged > 0);
+  free(components);
+  free(vertices);
   return trees;
 }
 
 
 int main(int argc, char *argv[]) {
+  int vertex_count, edge_count, i;
+  scanf("%d %d", &vertex_count, &edge_count);
+  Edge *edges = (Edge*) malloc(edge_count * sizeof(Edge));
+  for (i=0; i<edge_count; i++)
+    scanf("%d %d %d", &edges[i].source, &edges[i].target, &edges[i].weight);
+  int *trees = boruvka_mst(vertex_count, edges, edge_count);
+  int count = 0, weight = 0;
+  for (i=0; i<edge_count; i++) {
+    if (trees[i] < 0) continue;
+    weight += edges[trees[i]].weight;
+    count++;
+  }
+  printf("%d\n", count);
+  for (i=0; i<edge_count; i++) {
+    if (trees[i] < 0) continue;
+    Edge edge = edges[trees[i]];
+    printf("%d %d\n", edge.source, edge.target);
+  }
+  printf("%d\n", weight);
+  free(trees);
   return 0;
 }
