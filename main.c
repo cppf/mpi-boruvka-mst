@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
 
 typedef struct _Edge {
@@ -106,6 +105,7 @@ int* boruvka_mst(int vertex_count, Edge *edges, int edge_count) {
     components = components_setup(components, component_count);
     components_find(components, vertices, edges, 0, edge_count);
     merged = trees_merge(trees, edge_count, components, component_count, vertices, edges);
+    component_count -= merged;
   }while(merged > 0);
   free(components);
   free(vertices);
@@ -117,20 +117,22 @@ int main(int argc, char *argv[]) {
   int vertex_count, edge_count, i;
   scanf("%d %d", &vertex_count, &edge_count);
   Edge *edges = (Edge*) malloc(edge_count * sizeof(Edge));
-  for (i=0; i<edge_count; i++)
+  for (i=0; i<edge_count; i++) {
     scanf("%d %d %d", &edges[i].source, &edges[i].target, &edges[i].weight);
+    edges[i].source--; edges[i].target--;
+  }
   int *trees = boruvka_mst(vertex_count, edges, edge_count);
   int count = 0, weight = 0;
   for (i=0; i<edge_count; i++) {
     if (trees[i] < 0) continue;
-    weight += edges[trees[i]].weight;
+    weight += edges[i].weight;
     count++;
   }
   printf("%d\n", count);
   for (i=0; i<edge_count; i++) {
     if (trees[i] < 0) continue;
-    Edge edge = edges[trees[i]];
-    printf("%d %d\n", edge.source, edge.target);
+    Edge edge = edges[i];
+    printf("%d %d\n", edge.source+1, edge.target+1);
   }
   printf("%d\n", weight);
   free(trees);
